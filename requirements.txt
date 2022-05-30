@@ -1,0 +1,11 @@
+asgiref==3.5.2
+Django==4.0.4
+django-rest-framework==0.1.0
+djangorestframework==3.13.1
+phonenumbers==8.12.49
+psycopg2==2.9.3
+python-http-client==3.3.7
+pytz==2022.1
+sendgrid==3.6.5
+sendgrid-django==4.2.0
+sqlparse==0.4.2
