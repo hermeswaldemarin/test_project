@@ -1,8 +1,6 @@
-import os
 import sendgrid
-from sendgrid.helpers.mail import *
 from django.conf import settings
-import phonenumbers
+from sendgrid.helpers.mail import *
 
 from phone_attrib.models import Customer
 
@@ -35,21 +33,21 @@ class PhoneAttribService(object):
     }
 
     @staticmethod
-    def attribPhone(customerId, areaCode):
+    def attrib_phone(customer_id, area_code):
 
-        customer = Customer.objects.get(pk=customerId);
+        customer = Customer.objects.get(pk=customer_id)
 
-        phone_object = PhoneAttribService.phone_list.get(areaCode).pop();
-        phone_number = phone_object["number"];
+        phone_object = PhoneAttribService.phone_list.get(area_code).pop()
+        phone_number = phone_object["number"]
 
         from_email = Email(PhoneAttribService.PHONEATTRIB_MAILFROM)
         to_email = Email(customer.email)
-        content = Content("text/plain", "Phone Number: (%s) %s" % (areaCode,phone_number))
-        mail = Mail(from_email, PhoneAttribService.PHONEATTRIB_SUBJECT, to_email, content)
+        content = Content("text/plain", "Phone Number: (%s) %s" % (area_code, phone_number))
+        mail_object = Mail(from_email, PhoneAttribService.PHONEATTRIB_SUBJECT, to_email, content)
         try:
             sg = sendgrid.SendGridAPIClient(api_key=PhoneAttribService.SENDGRID_API_KEY)
-            response = sg.client.mail.send.post(request_body=mail.get())
-            return "(%s) %s" % (areaCode,phone_number);
+            response = sg.client.mail.send.post(request_body=mail_object.get())
+            return "(%s) %s" % (area_code, phone_number)
         except Exception as e:
             print(e)
-            return;
+            return

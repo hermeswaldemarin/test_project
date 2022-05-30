@@ -13,10 +13,9 @@ class CustomerListApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        todos = Customer.objects.all();
-        serializer = CustomerSerializer(todos, many=True)
+        customers = Customer.objects.all()
+        serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
     def post(self, request, *args, **kwargs):
         data = {
@@ -29,25 +28,27 @@ class CustomerListApiView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class PhoneListApiView(APIView):
-    # add permission to check if user is authenticated
+
     permission_classes = [permissions.IsAuthenticated]
 
-    # 1. List all
-    def get(self, request, *args, **customerId):
-        customerId = int(self.kwargs['customerId'])
-        areaCode = int(self.kwargs['areaCode'])
+    def get(self, request, *args, **customer_id):
+        customer_id = int(self.kwargs['customer_id'])
+        area_code = int(self.kwargs['area_code'])
 
-        if not Customer.objects.filter(pk=customerId).exists():
+        if not Customer.objects.filter(pk=customer_id).exists():
             return Response("Customer does not exists", status=status.HTTP_400_BAD_REQUEST)
 
-        if  PhoneAttribService.phone_list.get(areaCode) is None or len(PhoneAttribService.phone_list.get(areaCode)) == 0:
-            return Response("Phone Numbers not available for this area code", status=status.HTTP_400_BAD_REQUEST)
+        number = phonenumbers.parse("+1%s9999999" % area_code, None)
 
-        if(not phonenumbers.is_valid_number_for_region(phonenumbers.parse("+1%s9999999" % areaCode, None), "US")):
+        if not phonenumbers.is_valid_number_for_region(number, "US"):
             return Response("Invalid area code for US", status=status.HTTP_400_BAD_REQUEST)
 
-        phone = PhoneAttribService.attribPhone(customerId, areaCode);
+        if PhoneAttribService.phone_list.get(area_code) is None or len(PhoneAttribService.phone_list.get(area_code)) == 0:
+            return Response("Phone Numbers not available for this area code", status=status.HTTP_400_BAD_REQUEST)
+
+        phone = PhoneAttribService.attrib_phone(customer_id, area_code)
 
         if phone is None:
             return Response("Error in phone attribution", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
